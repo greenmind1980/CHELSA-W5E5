@@ -1,0 +1,24 @@
+#!/bin/bash
+
+
+
+YEAR=2019
+RESUBMIT=1
+
+
+
+if [ $RESUBMIT -eq 1 ]
+then
+  LDIR=/p/projects/proclias/1km/logs/chelsa_w5e5/downscaling
+  LFILES="$(grep -l -i "memory allocation failed" $LDIR/*) $(grep -l -i "fatal" $LDIR/*)"
+  DAY_RANGE=$(tr ' ' '\n' <<< $LFILES|rev|cut -d _ -f 1|rev|sort -u -n|tr '\n' ','|sed 's/,$//')
+  rm $LFILES
+else
+  DAY_OF_THE_YEAR_START=2
+  DAY_OF_THE_YEAR_END=364
+  [ $DAY_OF_THE_YEAR_START -eq $DAY_OF_THE_YEAR_END ] && DAY_RANGE=$DAY_OF_THE_YEAR_START || DAY_RANGE=$DAY_OF_THE_YEAR_START-$DAY_OF_THE_YEAR_END
+fi
+
+
+
+sbatch --array=$DAY_RANGE CHELSA_W5E5_pik.sh $YEAR
